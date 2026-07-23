@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dwy7m842rnilg"]
-
-[ext_resource type="Script" uid="uid://h4nl3josie5g" path="res://scenes/pong_minigame.gd" id="1_gwh40"]
-
-[node name="PongMinigame" type="Node2D"]
-script = ExtResource("1_gwh40")

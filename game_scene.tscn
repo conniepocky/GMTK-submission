@@ -1,10 +1,12 @@
-[gd_scene load_steps=9 format=3 uid="uid://cdln6daub6une"]
+[gd_scene load_steps=13 format=3 uid="uid://cdln6daub6une"]
 
 [ext_resource type="Script" uid="uid://j0nchdjyokq8" path="res://game_scene.gd" id="1_mlf6e"]
 [ext_resource type="FontFile" uid="uid://dhsjug0gnmqg5" path="res://themes/eXP/styles/fonts/MS Sans Serif.ttf" id="2_mixcd"]
 [ext_resource type="Theme" uid="uid://c5smlolg1l1dx" path="res://themes/eXP/eXP_Royale.tres" id="2_v1wow"]
 [ext_resource type="Texture2D" uid="uid://c4q6gal0qcnxg" path="res://themes/eXP/styles/window/close.svg" id="3_mixcd"]
 [ext_resource type="AudioStream" uid="uid://bcwww7k4klto" path="res://sounds/freesound_community-electronic-buzzing-sound-29464.mp3" id="5_mj2jn"]
+[ext_resource type="Texture2D" uid="uid://bf2ixapc8j32k" path="res://themes/eXP/styles/scroll/slider-horz.png" id="6_kdryc"]
+[ext_resource type="Texture2D" uid="uid://dh015nptuadwl" path="res://themes/eXP/styles/scroll/royale/Range/slider-horz.png" id="7_e35lh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mj2jn"]
 bg_color = Color(0.9254902, 0.9137255, 0.84705883, 1)
@@ -33,6 +35,14 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.49803922, 0.6156863, 0.7254902, 1)
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_6e45b"]
+color = Color(0.36471137, 0.3647114, 0.3647114, 1)
+thickness = 5
+
+[sub_resource type="StyleBoxLine" id="StyleBoxLine_e35lh"]
+color = Color(0.30980393, 0.8039216, 0.30588236, 1)
+thickness = 5
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_mlf6e")
@@ -88,11 +98,11 @@ text = "Submit"
 [node name="AnswerInput" type="LineEdit" parent="MathsPopup"]
 texture_filter = 1
 layout_mode = 0
-offset_left = 4.2115836
-offset_top = 15.695676
-offset_right = 120.211586
-offset_bottom = 51.695675
-scale = Vector2(0.272, 0.2)
+offset_left = 5.3102574
+offset_top = 18.274252
+offset_right = 81.31026
+offset_bottom = 44.274254
+scale = Vector2(0.4, 0.294)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/selection_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_mixcd")
@@ -145,11 +155,11 @@ text = "math_prompt.exe"
 [node name="QuestionLabel" type="Label" parent="MathsPopup"]
 texture_filter = 1
 layout_mode = 0
-offset_left = 1.7395672
-offset_top = 7.5115027
-offset_right = 94.73957
-offset_bottom = 35.5115
-scale = Vector2(0.15, 0.15)
+offset_left = 1.5564575
+offset_top = 6.0540476
+offset_right = 94.55646
+offset_bottom = 34.054047
+scale = Vector2(0.25, 0.25)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("2_mixcd")
 theme_override_font_sizes/font_size = 25
@@ -158,5 +168,21 @@ text = "Question"
 [node name="HumPlayer" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("5_mj2jn")
 
+[node name="CalibrationSlider" type="HSlider" parent="."]
+visible = false
+offset_left = 321.0
+offset_top = 250.0
+offset_right = 471.0
+offset_bottom = 290.0
+scale = Vector2(3, 3)
+theme_override_icons/grabber = ExtResource("6_kdryc")
+theme_override_icons/grabber_highlight = ExtResource("7_e35lh")
+theme_override_icons/grabber_disabled = ExtResource("6_kdryc")
+theme_override_icons/tick = ExtResource("6_kdryc")
+theme_override_styles/slider = SubResource("StyleBoxLine_6e45b")
+theme_override_styles/grabber_area = SubResource("StyleBoxLine_e35lh")
+theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_e35lh")
+
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="MathsPopup/SubmitButton" to="." method="_on_submit_button_pressed"]
+[connection signal="value_changed" from="CalibrationSlider" to="." method="_on_calibration_slider_value_changed"]

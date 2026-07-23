@@ -1,12 +1,10 @@
 extends Node2D
 
-var current_clicks: int = 1
-var current_state = 0
+var current_clicks: int = 51
+var current_state = 4
 
 var current_block: Button = null
 var drag_offset: Vector2 = Vector2.ZERO
-
-const PONG_SCENE = preload("res://scenes/pong_minigame.tscn")
 
 #state 0 1-10 normal clicking
 #state 1 11-25 button moves away
@@ -14,8 +12,8 @@ const PONG_SCENE = preload("res://scenes/pong_minigame.tscn")
 #state 3 41-50 sort numbers 
 #state 4 51-60 maths questions to increment 
 #state 5 61-72 humming invisible button 
-#state 6 73-84 pong 
-#state 7 85-94 text adventure
+#state 6 73-84 slider 
+#state 7 85-94 bouncer
 #state 8 95-98 button locked in centre dodge bullets
 #state 9 final click
 
@@ -25,7 +23,6 @@ const PONG_SCENE = preload("res://scenes/pong_minigame.tscn")
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -61,16 +58,15 @@ func update_state_logic() -> void:
 	elif current_clicks >= 51 and current_clicks <= 60:
 		current_state = 4
 	elif current_clicks >= 61 and current_clicks <= 72:
-		maths_popup.hide() # clean up State 4
+		maths_popup.hide() # clean up state 4
 		current_state = 5
 		start_invisible_button()
-	elif current_clicks == 73:
+	elif current_clicks == 73 and current_clicks <= 84:
 		hum_player.stop() #clean up state 5
-		button.modulate.a = 1.0 # Make it visible again for the future
-		button.hide()
+		button.modulate.a = 1.0 
 		current_state = 6
-		   
-		start_pong_state()
+		
+		start_slider_state()
 		
 func updateCounter() -> void:
 	label.text = str(current_clicks) + " / 100"
@@ -111,7 +107,6 @@ func getRandomButtonCoords() -> Array:
 	var new_y = randf_range(0, screen_size.y - button.size.y)
 	
 	return [new_x, new_y]
-	
 
 #state 1
 
@@ -265,8 +260,36 @@ func _on_submit_button_pressed() -> void:
 
 func start_invisible_button() -> void:
 	button.show() 
-	button.modulate.a = 0.0 
+	#button.modulate.a = 0.0 
 	hum_player.play()
 	move_button_randomly()
 	
 #state 6
+
+@onready var slider = $CalibrationSlider
+
+func start_slider_state() -> void:
+	print("slider state")
+	button.hide()
+	slider.show()
+	
+	slider.value = current_clicks
+
+func _on_calibration_slider_value_changed(value: float) -> void:
+	if current_state == 6:
+		var target_score = current_clicks + 1
+		var int_value = int(value)
+		
+		if int_value == target_score:
+			current_clicks += 1
+			updateCounter()
+						
+			if current_clicks >= 84:
+				slider.hide()
+				update_state_logic()
+				
+		elif int_value > target_score: #snap back if too forwards
+			slider.value = current_clicks
+			
+		elif int_value < current_clicks: # snap back if too backwards
+			slider.value = current_clicks
