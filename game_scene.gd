@@ -1,10 +1,20 @@
 extends Node2D
 
-var current_clicks: int = 51
-var current_state = 4
+var current_clicks: int = 85
+var current_state = 7
+
+var center_x = 0 
+var screen_bottom = 0
+var screen_right = 0
 
 var current_block: Button = null
 var drag_offset: Vector2 = Vector2.ZERO
+
+var button_velocity_y: float = 0.0
+var button_velocity_x: float = 0.0
+var gravity: float = 1500.0
+var bounce_y_strength: float = -850.0 #negative goes up
+var bounce_x_strength: float = 0
 
 #state 0 1-10 normal clicking
 #state 1 11-25 button moves away
@@ -22,7 +32,9 @@ var drag_offset: Vector2 = Vector2.ZERO
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	center_x = (get_viewport_rect().size.x / 2) - (button.size.x / 2) 
+	screen_bottom = get_viewport_rect().size.y - button.size.y
+	screen_right = get_viewport_rect().size.x - button.size.x
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -45,6 +57,35 @@ func _process(delta: float) -> void:
 			hum_player.volume_db = linear_to_db(linear_volume)
 		else:
 			hum_player.volume_db = -80.0 # mute
+			
+	if current_state == 7:
+		button_velocity_y += gravity * delta #gravity pulls downwards
+		
+		button.position.y += button_velocity_y * delta
+		button.position.x += button_velocity_x * delta
+		
+		#hits floor
+		
+		if button.position.y >= screen_bottom:
+			button.position.y = screen_bottom
+
+			button_velocity_y = 0.0 
+			
+			if current_clicks > 85:
+				current_clicks -= 1
+				updateCounter()
+			
+		# hits walls
+		
+		if button.position.x <= 0:
+			button.position.x = 0
+			button_velocity_x *= -1 # reverse direction 
+			
+		if button.position.x >= screen_right:
+			button.position.x = screen_right
+			button_velocity_x *= -1 # reverse direction 
+		
+		
 
 func update_state_logic() -> void:
 	if current_clicks >= 11 and current_clicks <= 25:
@@ -61,12 +102,14 @@ func update_state_logic() -> void:
 		maths_popup.hide() # clean up state 4
 		current_state = 5
 		start_invisible_button()
-	elif current_clicks == 73 and current_clicks <= 84:
+	elif current_clicks >= 73 and current_clicks <= 84:
 		hum_player.stop() #clean up state 5
 		button.modulate.a = 1.0 
 		current_state = 6
 		
 		start_slider_state()
+	elif current_clicks >= 85 and current_clicks <= 94:
+		current_state = 7
 		
 func updateCounter() -> void:
 	label.text = str(current_clicks) + " / 100"
@@ -94,6 +137,11 @@ func _on_button_pressed() -> void:
 			#spawn_fake_buttons(3)
 		5:
 			move_button_randomly()
+		7:
+			bounce_x_strength = randf_range(-500, 500)
+			
+			button_velocity_y = bounce_y_strength # bounce upwards
+			button_velocity_x = bounce_x_strength
 			
 func _on_fake_pressed() -> void:
 	current_clicks -= 1 
@@ -201,7 +249,7 @@ func check_sort_order() -> void:
 		updateCounter()
 		
 		button.show()
-		button.position = get_viewport_rect().size / 2 
+		button.position = center_x
 
 #state 4
 
@@ -219,7 +267,7 @@ var maths_questions: Array = [
 	{"type": "text", "q": "3+3+3", "a": "9"},
 	{"type": "text", "q": "49 / 7", "a": "7"},
 	{"type": "text", "q": "12x12", "a": "144"},
-	{"type": "image", "q": "res://maths/eq.png", "a": "5"},
+	{"type": "text", "q": "2x=10", "a": "5"},
 	{"type": "image", "q": "res://maths/trig.png", "a": "1"},
 	{"type": "image", "q": "res://maths/int.png", "a": "1"},
 ]
@@ -269,16 +317,15 @@ func start_invisible_button() -> void:
 @onready var slider = $CalibrationSlider
 
 func start_slider_state() -> void:
-	print("slider state")
 	button.hide()
 	slider.show()
 	
 	slider.value = current_clicks
 
-func _on_calibration_slider_value_changed(value: float) -> void:
+func _on_calibration_slider_drag_ended(value_changed: bool) -> void:
 	if current_state == 6:
 		var target_score = current_clicks + 1
-		var int_value = int(value)
+		var int_value = int(slider.value)
 		
 		if int_value == target_score:
 			current_clicks += 1
@@ -288,8 +335,10 @@ func _on_calibration_slider_value_changed(value: float) -> void:
 				slider.hide()
 				update_state_logic()
 				
-		elif int_value > target_score: #snap back if too forwards
+		else: # snap back
 			slider.value = current_clicks
 			
-		elif int_value < current_clicks: # snap back if too backwards
-			slider.value = current_clicks
+#state 7 code within button press and process 
+
+
+	

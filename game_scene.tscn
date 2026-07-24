@@ -185,4 +185,4 @@ theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_e35lh")
 
 [connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
 [connection signal="pressed" from="MathsPopup/SubmitButton" to="." method="_on_submit_button_pressed"]
-[connection signal="value_changed" from="CalibrationSlider" to="." method="_on_calibration_slider_value_changed"]
+[connection signal="drag_ended" from="CalibrationSlider" to="." method="_on_calibration_slider_drag_ended"]
