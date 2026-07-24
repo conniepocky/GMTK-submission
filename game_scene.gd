@@ -4,6 +4,7 @@ var current_clicks: int = 85
 var current_state = 7
 
 var center_x = 0 
+var center_y = 0
 var screen_bottom = 0
 var screen_right = 0
 
@@ -15,6 +16,10 @@ var button_velocity_x: float = 0.0
 var gravity: float = 1500.0
 var bounce_y_strength: float = -850.0 #negative goes up
 var bounce_x_strength: float = 0
+
+var projectile_scene = preload("res://projectile.tscn")
+var active_projectiles: Array = []
+var projectile_time: float = 0
 
 #state 0 1-10 normal clicking
 #state 1 11-25 button moves away
@@ -33,6 +38,7 @@ var bounce_x_strength: float = 0
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	center_x = (get_viewport_rect().size.x / 2) - (button.size.x / 2) 
+	center_y = (get_viewport_rect().size.y / 2) - (button.size.y / 2) 
 	screen_bottom = get_viewport_rect().size.y - button.size.y
 	screen_right = get_viewport_rect().size.x - button.size.x
 
@@ -72,7 +78,7 @@ func _process(delta: float) -> void:
 			button_velocity_y = 0.0 
 			
 			if current_clicks > 85:
-				current_clicks -= 1
+				#current_clicks -= 1
 				updateCounter()
 			
 		# hits walls
@@ -85,6 +91,14 @@ func _process(delta: float) -> void:
 			button.position.x = screen_right
 			button_velocity_x *= -1 # reverse direction 
 		
+	if current_state == 8:
+		projectile_time += delta 
+		
+		if projectile_time >= 0.3:
+			spawn_projectile()
+			projectile_time = 0.0
+			
+		move_projectile(delta)
 		
 
 func update_state_logic() -> void:
@@ -110,9 +124,22 @@ func update_state_logic() -> void:
 		start_slider_state()
 	elif current_clicks >= 85 and current_clicks <= 94:
 		current_state = 7
+	elif current_clicks >= 95 and current_clicks <= 98:
+		button_velocity_y = 0
+		button_velocity_x = 0
+		
+		current_state = 8
+	elif current_clicks == 99:
+		current_state = 9
+		
+		clear_projectiles()
 		
 func updateCounter() -> void:
 	label.text = str(current_clicks) + " / 100"
+	
+func position_button_central() -> void:
+	button.position.x = center_x
+	button.position.y = center_y
 
 func _on_button_pressed() -> void:
 	
@@ -128,7 +155,7 @@ func _on_button_pressed() -> void:
 	
 	match current_state:
 		0:
-			pass
+			position_button_central()
 		1:
 			move_button_randomly()
 		2:
@@ -142,6 +169,8 @@ func _on_button_pressed() -> void:
 			
 			button_velocity_y = bounce_y_strength # bounce upwards
 			button_velocity_x = bounce_x_strength
+		8:	
+			position_button_central()
 			
 func _on_fake_pressed() -> void:
 	current_clicks -= 1 
@@ -249,7 +278,7 @@ func check_sort_order() -> void:
 		updateCounter()
 		
 		button.show()
-		button.position = center_x
+		position_button_central()
 
 #state 4
 
@@ -340,5 +369,51 @@ func _on_calibration_slider_drag_ended(value_changed: bool) -> void:
 			
 #state 7 code within button press and process 
 
+#state 8 
 
+func spawn_projectile() -> void:
+	var bullet = projectile_scene.instantiate()
 	
+	var screen_x = get_viewport_rect().size.x
+	
+	bullet.position = Vector2(randf_range(0, screen_x), -30)
+	
+	var mouse_pos = get_global_mouse_position()
+	
+	var direction = (mouse_pos - bullet.position).normalized()
+	
+	add_child(bullet)
+	
+	active_projectiles.append({
+		"node": bullet,
+		"velocity": direction * 400.0
+	})
+	
+func move_projectile(delta: float) -> void:
+	for i in range(active_projectiles.size() -1, -1, -1):
+		var current = active_projectiles[i]
+		
+		var bullet = current["node"]
+		
+		bullet.position += current["velocity"] * delta
+			
+		var bullet_center = bullet.position 
+		var distance_to_mouse = bullet_center.distance_to(get_global_mouse_position())
+			
+		if distance_to_mouse < 15.0: 
+			if current_clicks > 94:
+				current_clicks -= 1
+				updateCounter()
+				
+			bullet.queue_free()
+			active_projectiles.remove_at(i)
+				
+		elif bullet.position.y > get_viewport_rect().size.y + 50 or bullet.position.x < -50 or bullet.position.x > get_viewport_rect().size.x + 50:
+			bullet.queue_free()
+			active_projectiles.remove_at(i)
+	
+func clear_projectiles() -> void:
+	for i in active_projectiles:
+		i["node"].queue_free()
+	
+	active_projectiles.clear()	
