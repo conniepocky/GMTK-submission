@@ -3,6 +3,7 @@
 [node name="Projectile" type="Node2D"]
 
 [node name="ColorRect" type="ColorRect" parent="."]
+self_modulate = Color(2.126257, 2.126257, 2.126257, 1)
 offset_left = -10.0
 offset_top = -10.0
 offset_right = 10.0

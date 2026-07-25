@@ -21,6 +21,9 @@ var projectile_scene = preload("res://projectile.tscn")
 var active_projectiles: Array = []
 var projectile_time: float = 0
 
+var confetti_scene = preload("res://confetti.tscn")
+var confetti_node: Node2D
+
 #state 0 1-10 normal clicking
 #state 1 11-25 button moves away
 #state 2 26-40 fake buttons that subtract points
@@ -34,6 +37,10 @@ var projectile_time: float = 0
 
 @onready var label = $Counter
 @onready var button = $Button
+@onready var background = $Background
+@onready var gameoverscreen = $GameOver
+
+var colour_themes: Array[Dictionary] = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -41,9 +48,53 @@ func _ready() -> void:
 	center_y = (get_viewport_rect().size.y / 2) - (button.size.y / 2) 
 	screen_bottom = get_viewport_rect().size.y - button.size.y
 	screen_right = get_viewport_rect().size.x - button.size.x
+	
+	colour_themes = [
+		# state 0
+		{ "background": Color("#321E48"), "text": Color("#65DCD5"), "button": Color("#43637E") },
+		
+		# state 1 
+		{ "background": Color("#F8B2B2"), "text": Color("#403D88"), "button": Color("#8B639B") },
+		
+		# state 2 
+		{ "background": Color("#001B79"), "text": Color("#ED5AB3"), "button": Color("#FF90C2") },
+		
+		# state 3 
+		{ "background": Color("#FAE7CB"), "text": Color("#FA6781"), "button": Color("#59B292") },
+		
+		# state 4 maths state
+		{ "background": Color("#F4F6F9"), "text": Color("#433D46"), "button": Color("#A7DBE8") },
+		
+		# state 5 
+		{ "background": Color("#FE81D4"), "text": Color("#FFEABB"), "button": Color("#FFEABB") },
+		
+		# state 6 no theme needed slider
+		{ "background": Color("#F4F6F9"), "text": Color("#433D46"), "button": Color("#C4C6CD") },
+		
+		# state 7 
+		{ "background": Color("#00E0BA"), "text": Color("#91008D"), "button": Color("#FF3483") },
+		
+		# state 8 
+		{ "background": Color("#333D6D"), "text": Color("#FFFFFF"), "button": Color("#723EC3") },
+		
+		#state 9
+		{ "background": Color("#321E48"), "text": Color("#65DCD5"), "button": Color("#43637E") },
+	]
+	
+	gameoverscreen.hide()
+	
+	label.position.x = (get_viewport_rect().size.x / 2) - (label.size.x / 2) 
+	
+	apply_theme(0)
+	position_button_central()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	
+	#confetti
+	
+	if confetti_node:
+		confetti_node.position = get_global_mouse_position()
 	
 	# update dragging 
 	if current_block != null:
@@ -65,41 +116,47 @@ func _process(delta: float) -> void:
 			hum_player.volume_db = -80.0 # mute
 			
 	if current_state == 7:
-		button_velocity_y += gravity * delta #gravity pulls downwards
-		
-		button.position.y += button_velocity_y * delta
-		button.position.x += button_velocity_x * delta
-		
-		#hits floor
-		
-		if button.position.y >= screen_bottom:
-			button.position.y = screen_bottom
-
-			button_velocity_y = 0.0 
-			
-			if current_clicks > 85:
-				#current_clicks -= 1
-				updateCounter()
-			
-		# hits walls
-		
-		if button.position.x <= 0:
-			button.position.x = 0
-			button_velocity_x *= -1 # reverse direction 
-			
-		if button.position.x >= screen_right:
-			button.position.x = screen_right
-			button_velocity_x *= -1 # reverse direction 
-		
+		handle_collisions(delta)
+	
 	if current_state == 8:
 		projectile_time += delta 
 		
-		if projectile_time >= 0.3:
+		if projectile_time >= 0.25:
 			spawn_projectile()
 			projectile_time = 0.0
 			
 		move_projectile(delta)
 		
+func apply_theme(state: int) -> void:
+	if state < 0 or state >= colour_themes.size():
+		return
+		
+	var theme = colour_themes[state]
+	
+	background.color = theme["background"]
+
+	label.add_theme_color_override("font_color", theme["text"])
+	
+	var button_style = button.get_theme_stylebox("normal") as StyleBoxFlat
+	
+	if button_style:
+		var styles: Array = ["normal", "hover", "pressed"]
+		
+		for i in styles:
+			var style = button.get_theme_stylebox(i) as StyleBoxFlat
+		
+			if not style:
+				style = StyleBoxFlat.new()
+				button.add_theme_stylebox_override(i, style)
+		
+			if i == "normal":
+				style.bg_color = theme["button"]
+			elif i == "hover":
+				style.bg_color = theme["button"].lightened(0.2)
+			elif i == "pressed":
+				style.bg_color = theme["button"].darkened(0.2) 
+				
+			style.set_border_width_all(0)
 
 func update_state_logic() -> void:
 	if current_clicks >= 11 and current_clicks <= 25:
@@ -112,6 +169,9 @@ func update_state_logic() -> void:
 		spawn_sorting_puzzle()
 	elif current_clicks >= 51 and current_clicks <= 60:
 		current_state = 4
+		maths_popup.show()
+		load_next_maths_question()
+		
 	elif current_clicks >= 61 and current_clicks <= 72:
 		maths_popup.hide() # clean up state 4
 		current_state = 5
@@ -133,6 +193,11 @@ func update_state_logic() -> void:
 		current_state = 9
 		
 		clear_projectiles()
+		position_button_central()
+	elif current_clicks == 100:
+		game_ended()
+		
+	apply_theme(current_state)
 		
 func updateCounter() -> void:
 	label.text = str(current_clicks) + " / 100"
@@ -150,18 +215,19 @@ func _on_button_pressed() -> void:
 	
 	current_clicks += 1 
 	
+	$ClickSound.play()
+	
 	updateCounter()
 	update_state_logic()
 	
 	match current_state:
 		0:
-			position_button_central()
+			pass
 		1:
 			move_button_randomly()
 		2:
-			pass
-			#move_button_randomly()
-			#spawn_fake_buttons(3)
+			move_button_randomly()
+			spawn_fake_buttons(3)
 		5:
 			move_button_randomly()
 		7:
@@ -170,11 +236,33 @@ func _on_button_pressed() -> void:
 			button_velocity_y = bounce_y_strength # bounce upwards
 			button_velocity_x = bounce_x_strength
 		8:	
+			move_button_randomly()
+		9:
 			position_button_central()
 			
 func _on_fake_pressed() -> void:
-	current_clicks -= 1 
-	updateCounter()
+	#current_clicks -= 1 
+	#updateCounter()
+	pass
+
+func start_looping_confetti() -> void:
+	if not confetti_node:
+		confetti_node = confetti_scene.instantiate()
+		gameoverscreen.add_child(confetti_node)
+		
+		# Start emitting
+		var particle_node = confetti_node.get_node("ConfettiParticle")
+		particle_node.emitting = true
+	
+func game_ended() -> void:
+	gameoverscreen.show()
+	button.hide()
+	label.hide()
+	
+	# handle confetti
+	
+	start_looping_confetti()
+		
 
 # logic for each state
 
@@ -224,6 +312,28 @@ func createBlock(num: int, index: int) -> Button:
 		
 	block.set_meta("num_value", num)
 	block.add_theme_font_size_override("font_size", 32)
+	
+	#setup theme
+	
+	var theme = colour_themes[current_state]
+	
+	block.focus_mode = Control.FOCUS_NONE
+	
+	var styles: Array = ["normal", "hover", "pressed"]
+	for i in styles:
+		var style = StyleBoxFlat.new()
+		
+		if i == "normal":
+			style.bg_color = theme["button"]
+		elif i == "hover":
+			style.bg_color = theme["button"].lightened(0.2)
+		elif i == "pressed":
+			style.bg_color = theme["button"].darkened(0.2)
+			
+		style.set_border_width_all(0)
+		block.add_theme_stylebox_override(i, style)
+	
+	#handle positioning
 		
 	var start_x = 100 + (index * 80)
 	var start_y = randf_range(250, 350)
@@ -367,7 +477,34 @@ func _on_calibration_slider_drag_ended(value_changed: bool) -> void:
 		else: # snap back
 			slider.value = current_clicks
 			
-#state 7 code within button press and process 
+#state 7
+
+func handle_collisions(delta: float) -> void:
+		button_velocity_y += gravity * delta #gravity pulls downwards
+		
+		button.position.y += button_velocity_y * delta
+		button.position.x += button_velocity_x * delta
+		
+		#hits floor
+		
+		if button.position.y >= screen_bottom:
+			button.position.y = screen_bottom
+
+			button_velocity_y = 0.0 
+			
+			if current_clicks > 85:
+				#current_clicks -= 1
+				updateCounter()
+			
+		# hits walls
+		
+		if button.position.x <= 0:
+			button.position.x = 0
+			button_velocity_x *= -1 # reverse direction 
+			
+		if button.position.x >= screen_right:
+			button.position.x = screen_right
+			button_velocity_x *= -1 # reverse direction 
 
 #state 8 
 
@@ -386,7 +523,7 @@ func spawn_projectile() -> void:
 	
 	active_projectiles.append({
 		"node": bullet,
-		"velocity": direction * 400.0
+		"velocity": direction * 500.0
 	})
 	
 func move_projectile(delta: float) -> void:

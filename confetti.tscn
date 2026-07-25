@@ -1,0 +1,61 @@
+[gd_scene load_steps=10 format=3 uid="uid://d2kx0dsequipt"]
+
+[ext_resource type="Texture2D" uid="uid://cxfliwnnk4xto" path="res://assets/413409734-86c17908-9984-45a3-947d-e2d0175b7119.png" id="1_0lbn0"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_xnakt"]
+particles_animation = true
+particles_anim_h_frames = 2
+particles_anim_v_frames = 1
+particles_anim_loop = true
+
+[sub_resource type="Gradient" id="Gradient_ilyld"]
+offsets = PackedFloat32Array(0, 0.5294118, 1)
+colors = PackedColorArray(1, 0.5176471, 0.7294118, 1, 1, 0.8745098, 0.50980395, 1, 0.6, 0.7607843, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_smimb"]
+gradient = SubResource("Gradient_ilyld")
+
+[sub_resource type="Curve" id="Curve_ovyj8"]
+
+[sub_resource type="CurveTexture" id="CurveTexture_sf15k"]
+curve = SubResource("Curve_ovyj8")
+
+[sub_resource type="Curve" id="Curve_e4145"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.58561635, 1), 0.0, 0.0, 0, 0, Vector2(0.9999999, 0.72583485), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_1anic"]
+curve = SubResource("Curve_e4145")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_7yc5w"]
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 1.0
+direction = Vector3(0, -1, 0)
+initial_velocity_min = 300.0
+initial_velocity_max = 360.0
+angular_velocity_min = -180.00002
+angular_velocity_max = 179.99998
+gravity = Vector3(0, 75, 0)
+linear_accel_min = 9.999997
+linear_accel_max = 29.999996
+damping_min = 74.0
+damping_max = 78.0
+damping_curve = SubResource("CurveTexture_sf15k")
+scale_max = 4.0
+scale_curve = SubResource("CurveTexture_1anic")
+color_initial_ramp = SubResource("GradientTexture1D_smimb")
+anim_speed_min = 2.0
+anim_speed_max = 5.0
+anim_offset_max = 1.0
+
+[node name="Node2D" type="Node2D"]
+
+[node name="ConfettiParticle" type="GPUParticles2D" parent="."]
+texture_filter = 1
+material = SubResource("CanvasItemMaterial_xnakt")
+amount = 50
+texture = ExtResource("1_0lbn0")
+lifetime = 4.0
+explosiveness = 0.97
+process_material = SubResource("ParticleProcessMaterial_7yc5w")
