@@ -1,12 +1,10 @@
-[gd_scene load_steps=17 format=3 uid="uid://cdln6daub6une"]
+[gd_scene load_steps=15 format=3 uid="uid://cdln6daub6une"]
 
 [ext_resource type="Script" uid="uid://j0nchdjyokq8" path="res://game_scene.gd" id="1_mlf6e"]
-[ext_resource type="FontFile" uid="uid://dhsjug0gnmqg5" path="res://themes/eXP/styles/fonts/MS Sans Serif.ttf" id="2_mixcd"]
-[ext_resource type="Theme" uid="uid://c5smlolg1l1dx" path="res://themes/eXP/eXP_Royale.tres" id="2_v1wow"]
-[ext_resource type="Texture2D" uid="uid://c4q6gal0qcnxg" path="res://themes/eXP/styles/window/close.svg" id="3_mixcd"]
+[ext_resource type="FontFile" uid="uid://dhsjug0gnmqg5" path="res://assets/fonts/MS Sans Serif.ttf" id="2_mixcd"]
+[ext_resource type="Texture2D" uid="uid://c4q6gal0qcnxg" path="res://assets/close.svg" id="3_mixcd"]
 [ext_resource type="AudioStream" uid="uid://bcwww7k4klto" path="res://sounds/freesound_community-electronic-buzzing-sound-29464.mp3" id="5_mj2jn"]
-[ext_resource type="Texture2D" uid="uid://bf2ixapc8j32k" path="res://themes/eXP/styles/scroll/slider-horz.png" id="6_kdryc"]
-[ext_resource type="Texture2D" uid="uid://dh015nptuadwl" path="res://themes/eXP/styles/scroll/royale/Range/slider-horz.png" id="7_e35lh"]
+[ext_resource type="Texture2D" uid="uid://dh015nptuadwl" path="res://assets/slider-horz.png" id="7_e35lh"]
 [ext_resource type="AudioStream" uid="uid://dy7l3qnfam3di" path="res://sounds/photos-click-409642.mp3" id="8_e35lh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_udeyl"]
@@ -155,7 +153,6 @@ offset_top = 5.673692
 offset_right = 80.81982
 offset_bottom = 47.67369
 scale = Vector2(-0.057, 0.25)
-theme = ExtResource("2_v1wow")
 theme_override_font_sizes/font_size = 12
 theme_override_icons/icon = ExtResource("3_mixcd")
 
@@ -195,10 +192,7 @@ offset_top = 250.0
 offset_right = 471.0
 offset_bottom = 290.0
 scale = Vector2(3, 3)
-theme_override_icons/grabber = ExtResource("6_kdryc")
 theme_override_icons/grabber_highlight = ExtResource("7_e35lh")
-theme_override_icons/grabber_disabled = ExtResource("6_kdryc")
-theme_override_icons/tick = ExtResource("6_kdryc")
 theme_override_styles/slider = SubResource("StyleBoxLine_6e45b")
 theme_override_styles/grabber_area = SubResource("StyleBoxLine_e35lh")
 theme_override_styles/grabber_area_highlight = SubResource("StyleBoxLine_e35lh")

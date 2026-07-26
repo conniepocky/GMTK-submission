@@ -51,7 +51,7 @@ func _ready() -> void:
 	
 	colour_themes = [
 		# state 0
-		{ "background": Color("#321E48"), "text": Color("#65DCD5"), "button": Color("#43637E") },
+		{ "background": Color("#232f72"), "text": Color("#65DCD5"), "button": Color("#43637e") },
 		
 		# state 1 
 		{ "background": Color("#F8B2B2"), "text": Color("#403D88"), "button": Color("#8B639B") },
@@ -78,7 +78,7 @@ func _ready() -> void:
 		{ "background": Color("#333D6D"), "text": Color("#FFFFFF"), "button": Color("#723EC3") },
 		
 		#state 9
-		{ "background": Color("#321E48"), "text": Color("#65DCD5"), "button": Color("#43637E") },
+		{ "background": Color("#232f72"), "text": Color("#65DCD5"), "button": Color("#43637e") },
 	]
 	
 	gameoverscreen.hide()
@@ -447,7 +447,11 @@ func _on_submit_button_pressed() -> void:
 
 func start_invisible_button() -> void:
 	button.show() 
+<<<<<<< HEAD
 	#button.modulate.a = 0.0 
+=======
+	button.modulate.a = 0.0 
+>>>>>>> ed6132b (fresh commit)
 	hum_player.play()
 	move_button_randomly()
 	
