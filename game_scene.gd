@@ -3,6 +3,8 @@ extends Node2D
 var current_clicks: int = 1
 var current_state = 0
 
+var has_clicked: bool = false
+
 var center_x = 0 
 var center_y = 0
 var screen_bottom = 0
@@ -220,6 +222,11 @@ func position_button_central() -> void:
 	button.position.y = center_y
 
 func _on_button_pressed() -> void:
+
+	if has_clicked:
+		return # prevent multiple clicks in a single frame
+	else:
+		has_clicked = true
 	
 	if current_state == 4:
 		maths_popup.show()
@@ -252,6 +259,11 @@ func _on_button_pressed() -> void:
 			move_button_randomly()
 		9:
 			position_button_central()
+
+	get_tree().create_timer(0.4).timeout.connect(_reset_click_flag)
+
+func _reset_click_flag() -> void:
+	has_clicked = false
 			
 func _on_fake_pressed() -> void:
 	#current_clicks -= 1 
