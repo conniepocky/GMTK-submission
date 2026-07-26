@@ -1,7 +1,7 @@
 extends Node2D
 
-var current_clicks: int = 85
-var current_state = 7
+var current_clicks: int = 1
+var current_state = 0
 
 var center_x = 0 
 var center_y = 0
@@ -39,6 +39,10 @@ var confetti_node: Node2D
 @onready var button = $Button
 @onready var background = $Background
 @onready var gameoverscreen = $GameOver
+
+@onready var startMusic = $StartMusic
+@onready var victoryMusic = $VictoryMusic
+@onready var finalMusic = $FinalMusic
 
 var colour_themes: Array[Dictionary] = []
 
@@ -295,6 +299,11 @@ func spawn_fake_buttons(amount: int) -> void:
 		fake_btn.text = "Click Me"
 	
 		fake_btn.add_theme_font_size_override("font_size", button.get_theme_font_size("font_size"))
+		fake_btn.add_theme_font_override("font", button.get_theme_font("font"))
+
+		fake_btn.add_theme_stylebox_override("normal", button.get_theme_stylebox("normal"))
+		fake_btn.add_theme_stylebox_override("hover", button.get_theme_stylebox("hover"))
+		fake_btn.add_theme_stylebox_override("pressed", button.get_theme_stylebox("pressed"))
 		
 		var coords = getRandomButtonCoords()
 		fake_btn.position = Vector2(coords[0], coords[1])
@@ -312,6 +321,7 @@ func createBlock(num: int, index: int) -> Button:
 		
 	block.set_meta("num_value", num)
 	block.add_theme_font_size_override("font_size", 32)
+	block.add_theme_font_override("font", button.get_theme_font("font"))
 	
 	#setup theme
 	
@@ -447,11 +457,7 @@ func _on_submit_button_pressed() -> void:
 
 func start_invisible_button() -> void:
 	button.show() 
-<<<<<<< HEAD
-	#button.modulate.a = 0.0 
-=======
 	button.modulate.a = 0.0 
->>>>>>> ed6132b (fresh commit)
 	hum_player.play()
 	move_button_randomly()
 	
