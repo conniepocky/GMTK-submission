@@ -91,6 +91,7 @@ func _ready() -> void:
 	
 	apply_theme(0)
 	position_button_central()
+	startMusic.play()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -179,9 +180,17 @@ func update_state_logic() -> void:
 	elif current_clicks >= 61 and current_clicks <= 72:
 		maths_popup.hide() # clean up state 4
 		current_state = 5
+
+		if startMusic.playing:
+			startMusic.stop()
+
 		start_invisible_button()
 	elif current_clicks >= 73 and current_clicks <= 84:
 		hum_player.stop() #clean up state 5
+
+		if !finalMusic.playing:
+			finalMusic.play()
+
 		button.modulate.a = 1.0 
 		current_state = 6
 		
@@ -259,6 +268,8 @@ func start_looping_confetti() -> void:
 		particle_node.emitting = true
 	
 func game_ended() -> void:
+	finalMusic.stop()
+	victoryMusic.play()
 	gameoverscreen.show()
 	button.hide()
 	label.hide()
@@ -417,7 +428,7 @@ var maths_questions: Array = [
 	{"type": "text", "q": "49 / 7", "a": "7"},
 	{"type": "text", "q": "12x12", "a": "144"},
 	{"type": "text", "q": "2x=10", "a": "5"},
-	{"type": "image", "q": "res://maths/trig.png", "a": "1"},
+	{"type": "text", "q": "3x-1=11", "a": "4"},
 	{"type": "image", "q": "res://maths/int.png", "a": "1"},
 ]
 
@@ -458,7 +469,10 @@ func _on_submit_button_pressed() -> void:
 func start_invisible_button() -> void:
 	button.show() 
 	button.modulate.a = 0.0 
-	hum_player.play()
+
+	if !hum_player.playing:
+		hum_player.play()
+
 	move_button_randomly()
 	
 #state 6
@@ -533,7 +547,7 @@ func spawn_projectile() -> void:
 	
 	active_projectiles.append({
 		"node": bullet,
-		"velocity": direction * 500.0
+		"velocity": direction * 650.0
 	})
 	
 func move_projectile(delta: float) -> void:
